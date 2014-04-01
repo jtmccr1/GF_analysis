@@ -17,9 +17,9 @@ matt_soilNT= re.compile('(NT)-.*-(\d+)')
 matt_syn = re.compile('([A-C]\d)-(\d{2})-(\d+)')
 niel_2X = re.compile('([a-b]\d)-(.*)-.*')
 niel_4XJT = re.compile('([1-4][A-D])-(.*)-(\d+)')
-niel_no_= re.compile('([a-d])(.*)dn?(\d+)')
+niel_no_= re.compile('([a-d])([^-]*)dn?(\d+)')
 alyx_contam = re.compile('(\d+[AB])-(.*)-(D[-\d]\d*)')
-alyx_treat = re.compile('(\D+)-(\w+)-*D-?(\d+)')
+alyx_treat = re.compile('([NYC]\D*)-(\w+)-*D-?(\d+)')
 
 
 
@@ -47,7 +47,8 @@ for line in file:
 
 ## INOCULA ###
         alyx_con_inoc = alyx_contam_inoc.match(name)
-        n_inoc = niel_inoc.match(name)       
+        n_inoc = niel_inoc.match(name)   
+        ## Matt's are easy and will be a simple if statment    
 ##Samples ##       
         soil = matt_soil.match(name)
         soilNT = matt_soilNT.match(name)
@@ -96,7 +97,35 @@ for line in file:
             
             samples.append(newname)
             r1.append(fastq1)
-            test = name1         
+            test = name1  
+        elif name == 'soil-Inoc':
+            scientist = 'matt'
+            group = 'soil'
+            cage = 'INOC'
+            mouse = cage
+            day = cage
+            
+            
+            newname = scientist + '_' + group + '_' + cage + '_' + mouse + '_' + day
+            
+            samples.append(newname)
+            r1.append(fastq1)
+            test = name1  
+            
+        elif name == 'Cult-inoc-10-24':
+            scientist = 'matt'
+            group = 'syn'
+            cage = 'INOC'
+            mouse = cage
+            day = cage
+            
+            
+            newname = scientist + '_' + group + '_' + cage + '_' + mouse + '_' + day
+            
+            samples.append(newname)
+            r1.append(fastq1)
+            test = name1  
+                           
                 
                 
          # Matt soil
@@ -272,10 +301,59 @@ for line in file:
         if name2==test:          # test to see if name matches that of the last successful fastq
             r2.append(fastq2)
     r += 1
+## Replace 'bad' reads with fastq from rerun samples
+file.close
+
+file = open(sys.argv[1],'r')
+repeat = re.compile('^b-(.*fastq)')
+
+r=1
+replacements = []  # keep track of replacements for the sake of debugging
+
+for line in file:
+    line = line.strip()
+    if r%2!=0: #odd
+        fastq=line 
+        rep = repeat.match(fastq)
+        if rep:
+            searchfastq = rep.group(1)  # no b-
+            searchname = searchfastq.split('_')[0]   # Everything before the _ in the fastq
+            # some samples had slightly different names upon resequencing them
+            if searchname == '268-B-NT-D0':
+                searchname == '268B-NT-D0'
+            elif searchname == '581B-2-d1':
+                searchname == '581B-2-D1'
+            elif searchname == '286A-1-D-11':    
+                searchname == '268A-1-D-11'   
+            elif searchname == '518B-18-D-5':                           
+                searchname == '581B-18-D-5'
+            elif searchname == '581B-2-d1':
+                searchname = '581B-2-D1'    
+
+            for l in range(len(r1)):         #r1 is from the odd lines and so should only include R1 reads so searching for name is fine
+                  if searchname+'_' in r1[l]:
+                      r1[l] = fastq
+                      replacename = 'b-'+searchname
+                      replacements.append(replacename)
+
+            
+    elif r%2==0: #even
+        fastq=line 
+        rep = repeat.match(fastq)
+        if repeat.match(fastq):
+            searchfastq = rep.group(1)
+            searchname = searchfastq.split('_')[0]
+            
+            for k in range(len(r2)):         #r2 is from the even lines and so should only include R1 reads so searching for name is fine
+                  if searchname +'-' in r2[k]:
+                      r2[k] = fastq
+    r+=1    
 print(len(r2))
-print('You missed these you fool!')
-print(len(missing))
-print(missing)
+print('You forgot these you fool!')
+
+forgot = list(set(missing)-set(replacements))
+print(len(forgot))
+print(forgot)
 for i in range(len(samples)):
     print(samples[i],r1[i],r2[i],sep='\t',end='\n',file=outfile)
     
