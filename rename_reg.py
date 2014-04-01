@@ -14,7 +14,7 @@ matt_syn = re.compile('([A-C]\d)-(\d{2})-(\d+)')
 niel_2X = re.compile('([a-b]\d)-(.*)-.*')
 niel_4XJT = re.compile('([1-4][A-D])-(.*)-(\d+)')
 niel_no_= re.compile('([a-d])(.*)dn?(\d+)')
-
+alyx_contam = re.compile('(\d+[AB])-(.*)-(D[-\d]\d*)')
 
 
 
@@ -46,6 +46,8 @@ for line in file:
         a1b4=niel_2X.match(name)
         A14D=niel_4XJT.match(name)
         no_ = niel_no_.match(name) 
+        contam = alyx_contam.match(name)
+
         if soil:
             scientist='matt'
             group = 'soil'
@@ -168,6 +170,33 @@ for line in file:
             samples.append(newname)
             r1.append(fastq1)
             test=name1
+
+        #Alyx contaminated
+        elif contam:
+            scientist = 'alyx'
+            group = contam.group(1)[0:-1]
+            cage = contam.group(1)[-1]
+            mouse = contam.group(2)
+            day = contam.group(3)
+            if '-' in day:
+                day = day.split('-')
+                day = day[-1]
+                day = str(15-int(day))
+            elif 'D0' in day:
+                day = '15'
+            else:
+                day = day.split('D') 
+                day = str(1+int(day[-1]))
+
+
+            newname = scientist + '_' + group + '_' + cage + '_' + mouse + '_' + day
+            samples.append(newname)
+            r1.append(fastq1)
+            test=name1
+
+
+
+
 
 
 
