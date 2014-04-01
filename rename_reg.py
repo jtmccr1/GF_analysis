@@ -6,8 +6,12 @@ import re
 file = open(sys.argv[1],'r')
 outfile = open(sys.argv[2],'w')
 
+# naming skemes for innocula
+alyx_contam_inoc = re.compile('(\d+)A-inoculum')
+niel_inoc = re.compile('([CH]\D{5,6}\d+)-\d{4}')
+
+
 # naming skemes for scientists and experiments
-# Matt  groups
 matt_soil = re.compile('(\d{4})-.*-(\d+)')
 matt_soilNT= re.compile('(NT)-.*-(\d+)')
 matt_syn = re.compile('([A-C]\d)-(\d{2})-(\d+)')
@@ -15,7 +19,8 @@ niel_2X = re.compile('([a-b]\d)-(.*)-.*')
 niel_4XJT = re.compile('([1-4][A-D])-(.*)-(\d+)')
 niel_no_= re.compile('([a-d])(.*)dn?(\d+)')
 alyx_contam = re.compile('(\d+[AB])-(.*)-(D[-\d]\d*)')
-alyx_treat = re.compile('(\w+)-(\d+)-D-(\d+)')
+alyx_treat = re.compile('(\D+)-(\w+)-*D-?(\d+)')
+
 
 
 
@@ -36,11 +41,14 @@ for line in file:
         name1 = line[0]
         name = name1.replace('N-T','NT') # replace the N-T in matt's with NT for mouse
         
-# If statement to determine how to handle the number of split names and what group goes where
+        if name == '846dn03':  # corrects a typo which labeled one of niels samples in correctly
+            name = 'd846dn03'
+# If statement to determine how to handle the number and what group goes where
 
-       
-        
-               
+## INOCULA ###
+        alyx_con_inoc = alyx_contam_inoc.match(name)
+        n_inoc = niel_inoc.match(name)       
+##Samples ##       
         soil = matt_soil.match(name)
         soilNT = matt_soilNT.match(name)
         syn = matt_syn.match(name)
@@ -49,8 +57,50 @@ for line in file:
         no_ = niel_no_.match(name) 
         contam = alyx_contam.match(name)
         treat = alyx_treat.match(name)
+        
+## INOCULA ###        
+        if alyx_con_inoc:
+            scientist='alyx'
+            group = alyx_con_inoc.group(1)
+            cage = 'INOC'
+            mouse= cage
+            day = cage
+            
+            newname = scientist + '_' + group + '_' + cage + '_' + mouse + '_' + day
+            
+            samples.append(newname)
+            r1.append(fastq1)
+            test = name1     
+        
+        elif n_inoc:
+            scientist = 'niel'
+            if n_inoc.group(1)=='Cancer7':
+                group = 'C1'
+            elif n_inoc.group(1)=='Cancer16':  
+                group = 'C2'
+            elif n_inoc.group(1)=='Cancer21':              
+                group = 'C3'
+            elif n_inoc.group(1)=='Healthy2':    
+                group = 'H1'
+            elif n_inoc.group(1)=='Healthy11':
+                group = 'H2'
+            elif n_inoc.group(1)=='Healthy18':    
+                group = 'H3'
+            else:
+            	group = 'WRONG'    
+            cage = 'INOC'    
+            mouse = cage
+            day = cage    
+                
+            newname = scientist + '_' + group + '_' + cage + '_' + mouse + '_' + day
+            
+            samples.append(newname)
+            r1.append(fastq1)
+            test = name1         
+                
+                
          # Matt soil
-        if soil:
+        elif soil:
             scientist='matt'
             group = 'soil'
             cage=soil.group(1)
@@ -211,7 +261,7 @@ for line in file:
             samples.append(newname)
             r1.append(fastq1)
             test=name1
-            
+                      
         else:
             missing.append(name)    
         
