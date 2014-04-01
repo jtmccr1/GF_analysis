@@ -319,34 +319,27 @@ for line in file:
             searchfastq = rep.group(1)  # no b-
             searchname = searchfastq.split('_')[0]   # Everything before the _ in the fastq
             # some samples had slightly different names upon resequencing them
-            if searchname == '268-B-NT-D0':
-                searchname == '268B-NT-D0'
-            elif searchname == '581B-2-d1':
-                searchname == '581B-2-D1'
-            elif searchname == '286A-1-D-11':    
-                searchname == '268A-1-D-11'   
-            elif searchname == '518B-18-D-5':                           
-                searchname == '581B-18-D-5'
-            elif searchname == '581B-2-d1':
-                searchname = '581B-2-D1'    
-
+     
             for l in range(len(r1)):         #r1 is from the odd lines and so should only include R1 reads so searching for name is fine
-                  if searchname+'_' in r1[l]:
+                  if searchname +'_' in r1[l]:
                       r1[l] = fastq
                       replacename = 'b-'+searchname
                       replacements.append(replacename)
 
             
-    elif r%2==0: #even
+    if r%2==0: #even
         fastq=line 
         rep = repeat.match(fastq)
-        if repeat.match(fastq):
-            searchfastq = rep.group(1)
-            searchname = searchfastq.split('_')[0]
-            
-            for k in range(len(r2)):         #r2 is from the even lines and so should only include R1 reads so searching for name is fine
-                  if searchname +'-' in r2[k]:
-                      r2[k] = fastq
+        if rep:
+            searchfastq = rep.group(1)  # no b-
+            searchname = searchfastq.split('_')[0]   # Everything before the _ in the fastq
+            # some samples had slightly different names upon resequencing them
+     
+            for l in range(len(r1)):         #r1 is from the odd lines and so should only include R1 reads so searching for name is fine
+                  if searchname +'_' in r1[l]:
+                      r2[l] = fastq
+                      replacename = 'b-'+searchname
+                      replacements.append(replacename)
     r+=1    
 print(len(r2))
 print('You forgot these you fool!')
