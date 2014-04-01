@@ -14,11 +14,8 @@ matt_syn = re.compile('([A-C]\d)-(\d{2})-(\d+)')
 niel_2X = re.compile('([a-b]\d)-(.*)-.*')
 niel_4XJT = re.compile('([1-4][A-D])-(.*)-(\d+)')
 niel_no_= re.compile('([a-d])(.*)dn?(\d+)')
-<<<<<<< HEAD
 alyx_contam = re.compile('(\d+[AB])-(.*)-(D[-\d]\d*)')
-=======
-alyx_contan = re.compile('(\d+[AB])-(.*)-(D[-\d]\d*)')
->>>>>>> Alyx's contaminated samples are recognized
+alyx_treat = re.compile('(\w+)-(\d+)-D-(\d+)')
 
 
 
@@ -41,7 +38,7 @@ for line in file:
         
 # If statement to determine how to handle the number of split names and what group goes where
 
-        # Matt soil
+       
         
                
         soil = matt_soil.match(name)
@@ -50,12 +47,9 @@ for line in file:
         a1b4=niel_2X.match(name)
         A14D=niel_4XJT.match(name)
         no_ = niel_no_.match(name) 
-<<<<<<< HEAD
         contam = alyx_contam.match(name)
-
-=======
-        contan = alyx_contan.match(name)
->>>>>>> Alyx's contaminated samples are recognized
+        treat = alyx_treat.match(name)
+         # Matt soil
         if soil:
             scientist='matt'
             group = 'soil'
@@ -201,34 +195,23 @@ for line in file:
             samples.append(newname)
             r1.append(fastq1)
             test=name1
-
-
-
-
-
-
-        #Alyx's contaminated
-        elif contan:
+           
+        #Alyx's treated samples (Chloroform and Carey Blair)
+        elif treat:
             scientist = 'alyx'
-            group = contan.group(1)[0:-1]  # take innocula number 
-            cage = contan.group(1)[-1]
-            mouse = contan.group(2)
-            day = contan.group(3)
-            if '-' in day:
-                day = day.split('-')
-                day = day[-1]
-                day = str(15-int(day))
-            elif 'D0' in day:
-                day = '15'
-            else:
-                day = day.split('D')
-                day = str(1+int(day[1]))
-                
+            if 'CHL' in treat.group(1):
+                group = 'Chloroform'
+            elif treat.group(1)=='N' or 'Y' or 'NC':
+                group = 'CairyBlair'
+            cage = treat.group(1)
+            mouse = treat.group(2).strip('-D')  # some samples are mouseD- others are mouse-D- this removes the D or the -D from the mouse string        
+            day = str(15-int(treat.group(3)))
+            
             newname = scientist + '_' + group + '_' + cage + '_' + mouse + '_' + day
             samples.append(newname)
             r1.append(fastq1)
-            test=name1            
- 
+            test=name1
+            
         else:
             missing.append(name)    
         
@@ -241,6 +224,7 @@ for line in file:
     r += 1
 print(len(r2))
 print('You missed these you fool!')
+print(len(missing))
 print(missing)
 for i in range(len(samples)):
     print(samples[i],r1[i],r2[i],sep='\t',end='\n',file=outfile)
