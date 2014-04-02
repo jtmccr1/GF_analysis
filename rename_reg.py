@@ -7,9 +7,9 @@ file = open(sys.argv[1],'r')
 outfile = open(sys.argv[2],'w')
 
 # naming skemes for innocula
-alyx_contam_inoc = re.compile('(\d+)A-inoculum')
+alyx_contam_inocA = re.compile('(\d+)A-inoculum')
 niel_inoc = re.compile('([CH]\D{5,6}\d+)-\d{4}')
-
+alyx_contam_inocB = re.compile('DA(\d+)')
 
 # naming skemes for scientists and experiments
 matt_soil = re.compile('(\d{4})-.*-(\d+)')
@@ -46,9 +46,9 @@ for line in file:
 # If statement to determine how to handle the number and what group goes where
 
 ## INOCULA ###
-        alyx_con_inoc = alyx_contam_inoc.match(name)
+        alyx_con_inocA = alyx_contam_inocA.match(name)
         n_inoc = niel_inoc.match(name)   
-        ## Matt's are easy and will be a simple if statment    
+        alyx_con_inocB = alyx_contam_inocB.match(name)
 ##Samples ##       
         soil = matt_soil.match(name)
         soilNT = matt_soilNT.match(name)
@@ -60,12 +60,12 @@ for line in file:
         treat = alyx_treat.match(name)
         
 ## INOCULA ###        
-        if alyx_con_inoc:
+        if alyx_con_inocA:
             scientist='alyx'
-            group = alyx_con_inoc.group(1)
-            cage = 'INOC'
-            mouse= cage
-            day = cage
+            group = alyx_con_inocA.group(1)
+            cage = 'A'
+            mouse= 'INOC'
+            day = mouse
             
             newname = scientist + '_' + group + '_' + cage + '_' + mouse + '_' + day
             
@@ -73,6 +73,18 @@ for line in file:
             r1.append(fastq1)
             test = name1     
         
+        elif alyx_con_inocB:
+            scientist='alyx'
+            group = alyx_con_inocB.group(1)
+            cage = 'B'
+            mouse= 'INOC'
+            day = mouse
+            
+            newname = scientist + '_' + group + '_' + cage + '_' + mouse + '_' + day
+            
+            samples.append(newname)
+            r1.append(fastq1)
+            test = name1  
         elif n_inoc:
             scientist = 'niel'
             if n_inoc.group(1)=='Cancer7':
@@ -319,16 +331,16 @@ for line in file:
         searchname = searchfastq.split('_')[0]   # Everything before the _ in the fastq
         # some samples had slightly different names upon resequencing them
         if searchname == '268-B-NT-D0':
-            replacements.append('b_'+searchname)
+            replacements.append('b-'+searchname)
             searchname = '268B-NT-D0'
         if searchname == '518B-18-D-5':
-            replacements.append('b_'+searchname)
+            replacements.append('b-'+searchname)
             searchname = '581B-18-D-5'        
         if searchname == '286A-1-D-11':
-            replacements.append('b_'+searchname)
+            replacements.append('b-'+searchname)
             searchname = '268A-1-D-11'
         if searchname == '581B-2-d1':
-            replacements.append('b_'+searchname)
+            replacements.append('b-'+searchname)
             searchname = '581B-2-D1'
     
         if r%2!=0: #odd
@@ -349,10 +361,11 @@ for line in file:
     r+=1    
 print(len(r2))
 print('You forgot these you fool!')
-
 forgot = list(set(missing)-set(replacements))
 print(len(forgot))
 print(forgot)
+
+
 for i in range(len(samples)):
     print(samples[i],r1[i],r2[i],sep='\t',end='\n',file=outfile)
     
