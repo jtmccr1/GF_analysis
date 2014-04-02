@@ -312,34 +312,40 @@ replacements = []  # keep track of replacements for the sake of debugging
 
 for line in file:
     line = line.strip()
-    if r%2!=0: #odd
-        fastq=line 
-        rep = repeat.match(fastq)
-        if rep:
-            searchfastq = rep.group(1)  # no b-
-            searchname = searchfastq.split('_')[0]   # Everything before the _ in the fastq
-            # some samples had slightly different names upon resequencing them
-     
-            for l in range(len(r1)):         #r1 is from the odd lines and so should only include R1 reads so searching for name is fine
-                  if searchname +'_' in r1[l]:
-                      r1[l] = fastq
-                      replacename = 'b-'+searchname
-                      replacements.append(replacename)
+    fastq=line 
+    rep = repeat.match(fastq)
+    if rep:
+        searchfastq = rep.group(1)  # no b-
+        searchname = searchfastq.split('_')[0]   # Everything before the _ in the fastq
+        # some samples had slightly different names upon resequencing them
+        if searchname == '268-B-NT-D0':
+            replacements.append('b_'+searchname)
+            searchname = '268B-NT-D0'
+        if searchname == '518B-18-D-5':
+            replacements.append('b_'+searchname)
+            searchname = '581B-18-D-5'        
+        if searchname == '286A-1-D-11':
+            replacements.append('b_'+searchname)
+            searchname = '268A-1-D-11'
+        if searchname == '581B-2-d1':
+            replacements.append('b_'+searchname)
+            searchname = '581B-2-D1'
+    
+        if r%2!=0: #odd
+    	    for l in range(len(r1)):         #r1 is from the odd lines and so should only include R1 reads so searching for name is fine
+                if searchname +'_' in r1[l]:
+                    r1[l] = fastq
+                    replacename = 'b-'+searchname
+                    replacements.append(replacename)
 
             
-    if r%2==0: #even
-        fastq=line 
-        rep = repeat.match(fastq)
-        if rep:
-            searchfastq = rep.group(1)  # no b-
-            searchname = searchfastq.split('_')[0]   # Everything before the _ in the fastq
-            # some samples had slightly different names upon resequencing them
-     
-            for l in range(len(r1)):         #r1 is from the odd lines and so should only include R1 reads so searching for name is fine
-                  if searchname +'_' in r1[l]:
-                      r2[l] = fastq
-                      replacename = 'b-'+searchname
-                      replacements.append(replacename)
+        if r%2==0: #even
+           
+            for l in range(len(r2)):         #r1 is from the odd lines and so should only include R1 reads so searching for name is fine
+                if searchname +'_' in r2[l]:
+                   r2[l] = fastq
+                   replacename = 'b-'+searchname
+                   replacements.append(replacename)
     r+=1    
 print(len(r2))
 print('You forgot these you fool!')
