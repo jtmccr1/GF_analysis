@@ -71,7 +71,7 @@ for line in file:
             
             samples.append(newname)
             r1.append(fastq1)
-            test = name1     
+            test = name1     # save original name to be matched with other fastq later
         
         elif alyx_con_inocB:
             scientist='alyx'
@@ -138,7 +138,7 @@ for line in file:
             r1.append(fastq1)
             test = name1  
                            
-                
+## Samples ##                
                 
          # Matt soil
         elif soil:
@@ -168,22 +168,22 @@ for line in file:
         elif syn:
             scientist='matt'
             group = 'syn'
-            cage=syn.group(1)[0]
+            cage=syn.group(1)[0]   # All in format 'A2' were A is the cage and 2 is the mouse
             mouse = syn.group(1)[1]
-            if int(syn.group(2)) == 10:
+            if int(syn.group(2)) == 10:         # The days were in date format with 10-23 as day 1
                     day = str(int(syn.group(3))-22)
             if int(syn.group(2)) == 11:
-                    day = str(int(syn.group(3))+9)
+                    day = str(int(syn.group(3))+9)  # 11-1 was really day 10 
             
             
             newname = scientist + '_' + group + '_' + cage + '_' + mouse + '_' + day
             samples.append(newname)
             r1.append(fastq1)
             test=name1
-        # Niel a1a2 b3b4
+        # Niel a1a2 b3b4  Used reg exp to identify but then for some reason I split the name variable to allocate, It was just easier
         elif a1b4:
-            name=name.split('-')
-            if name[0]=='a1' or name[0]=='a2':
+            name=name.split('-')    
+            if name[0]=='a1' or name[0]=='a2':  # Had same innocula
                 group = 'H3'
             elif name[0]=='b3' or name[0]=='b4':
                 group='C1'
@@ -192,11 +192,11 @@ for line in file:
             scientist='niel'
             cage = name[0]
             mouse = name[1]
-            if 'd' in name[-1]:
+            if 'd' in name[-1]:           # Some had d in the day section
                 try: 
                     m = re.search('(?<=\w)\d+',name[-1])  # take the digits after the last letter character
                     
-                    day = str(22-int(m.group(0))) 
+                    day = str(22-int(m.group(0))) # d0 becomes day 22
                 except ValueError:
                     day = 'WRONG'
             else:
@@ -224,7 +224,7 @@ for line in file:
             scientist = 'niel'
             cage = A14D.group(1)
             mouse = A14D.group(2)
-            day = str(22-int(A14D.group(3)))    
+            day = str(22-int(A14D.group(3)))    # again there were 21 days starting at day 0
             
             newname = scientist + '_' + group + '_' + cage + '_' + mouse + '_' + day
             samples.append(newname)
@@ -257,7 +257,7 @@ for line in file:
 
             scientist = 'niel'
             mouse = no_.group(2)
-            day = str(22-int(no_.group(3)))    
+            day = str(22-int(no_.group(3)))    # again there were 21 days starting at day 0
             
             newname = scientist + '_' + group + '_' + cage + '_' + mouse + '_' + day
             samples.append(newname)
@@ -279,7 +279,7 @@ for line in file:
                 day = '15'
             else:
                 day = day.split('D') 
-                day = str(1+int(day[-1]))
+                day = str(15+int(day[-1]))         # 21 days starting at day 0
 
 
             newname = scientist + '_' + group + '_' + cage + '_' + mouse + '_' + day
