@@ -6,15 +6,18 @@ import re
 file = open(sys.argv[1],'r')
 outfile = open(sys.argv[2],'w')
 
+
 # naming skemes for innocula
 alyx_contam_inocA = re.compile('(\d+)A-inoculum')
 niel_inoc = re.compile('([CH]\D{5,6}\d+)-\d{4}')
 alyx_contam_inocB = re.compile('DA(\d+)')
+matt_conv2 = re.compile('ConvIDneg(\d+)')
 
 # naming skemes for scientists and experiments
 matt_soil = re.compile('(\d{4})-.*-(\d+)')
 matt_soilNT= re.compile('(NT)-.*-(\d+)')
-matt_syn = re.compile('([A-C]\d)-(\d{2})-(\d+)')
+matt_syn1 = re.compile('([A-C]\d)-(\d{2})-(\d+)')
+matt_syn2 = re.compile('([A-C])(\d{3})D.*(\d{1,2})')
 niel_2X = re.compile('([a-b]\d)-(.*)-.*')
 niel_4XJT = re.compile('([1-4][A-D])-(.*)-(\d+)')
 niel_no_= re.compile('([a-d])([^-]*)dn?(\d+)')
@@ -41,18 +44,22 @@ for line in file:
         name1 = line[0]
         name = name1.replace('N-T','NT') # replace the N-T in matt's with NT for mouse
         
-        if name == '846dn03':  # corrects a typo which labeled one of niels samples in correctly
+        if name == '846dn03':  # corrects a typo which labeled one of niels samples incorrectly
             name = 'd846dn03'
+        if name == 'C03Dneg18':   # corrects a typo which labeled one of matt's syn2 samples incorrectly
+            name = 'C903Dneg18'    
 # If statement to determine how to handle the number and what group goes where
 
 ## INOCULA ###
         alyx_con_inocA = alyx_contam_inocA.match(name)
         n_inoc = niel_inoc.match(name)   
         alyx_con_inocB = alyx_contam_inocB.match(name)
+        syn2_conv = matt_conv2.match(name)
 ##Samples ##       
         soil = matt_soil.match(name)
         soilNT = matt_soilNT.match(name)
-        syn = matt_syn.match(name)
+        syn1 = matt_syn1.match(name)
+        syn2 = matt_syn2.match(name)
         a1b4=niel_2X.match(name)
         A14D=niel_4XJT.match(name)
         no_ = niel_no_.match(name) 
@@ -109,7 +116,22 @@ for line in file:
             
             samples.append(newname)
             r1.append(fastq1)
-            test = name1  
+            test = name1
+        
+        elif syn2_conv:
+            scientist='matt'
+            group = 'syn2'
+            cage = 'Conv'
+            mouse = 'INOC'
+            day = str(20-int(syn2_conv.group(1))) # Dneg 19 = Day 1
+            
+            newname = scientist + '_' + group + '_' + cage + '_' + mouse + '_' + day
+            
+            samples.append(newname)
+            r1.append(fastq1)
+            test = name1
+            
+                  
         elif name == 'soil-Inoc':
             scientist = 'matt'
             group = 'soil'
@@ -126,17 +148,31 @@ for line in file:
             
         elif name == 'Cult-inoc-10-24':
             scientist = 'matt'
-            group = 'syn'
-            cage = 'INOC'
-            mouse = cage
-            day = cage
+            group = 'syn1'
+            cage = 'syn'
+            mouse = 'INOC'
+            day = mouse
             
             
             newname = scientist + '_' + group + '_' + cage + '_' + mouse + '_' + day
             
             samples.append(newname)
             r1.append(fastq1)
-            test = name1  
+            test = name1 
+       
+        elif name == 'Feces-inoc-10-24':
+             scientist = 'matt'
+             group = 'syn1'
+             cage = 'Conv'
+             mouse = 'INOC'
+             day = mouse
+            
+            
+             newname = scientist + '_' + group + '_' + cage + '_' + mouse + '_' + day
+            
+             samples.append(newname)
+             r1.append(fastq1)
+             test = name1      
                            
 ## Samples ##                
                 
@@ -165,21 +201,36 @@ for line in file:
             test=name1
         
         # Matt Synthetic
-        elif syn:
+        elif syn1:
             scientist='matt'
-            group = 'syn'
-            cage=syn.group(1)[0]   # All in format 'A2' were A is the cage and 2 is the mouse
-            mouse = syn.group(1)[1]
-            if int(syn.group(2)) == 10:         # The days were in date format with 10-23 as day 1
-                    day = str(int(syn.group(3))-22)
-            if int(syn.group(2)) == 11:
-                    day = str(int(syn.group(3))+9)  # 11-1 was really day 10 
+            group = 'syn1'
+            cage=syn1.group(1)[0]   # All in format 'A2' were A is the cage and 2 is the mouse
+            mouse = syn1.group(1)[1]
+            if int(syn1.group(2)) == 10:         # The days were in date format with 10-23 as day -1 with 10-25 as day 1 
+                    day = str(int(syn1.group(3)) - 24)
+            if int(syn1.group(2)) == 11:
+                    day = str(int(syn1.group(3)) + 6) # 11-1 was really day 11 
             
             
             newname = scientist + '_' + group + '_' + cage + '_' + mouse + '_' + day
             samples.append(newname)
             r1.append(fastq1)
             test=name1
+            
+        elif syn2:
+            print('Matched a syn2!')
+            scientist = 'matt'
+            group = 'syn2'
+            cage= syn2.group(1)
+            mouse = syn2.group(2)
+            day = str(20-int(syn2.group(3))) # there were 3 days of Inoculation they are -2,-1, and 0 day 1 corresponds to Dneg19    
+            
+            newname = scientist + '_' + group + '_' + cage + '_' + mouse + '_' + day
+            
+            samples.append(newname)
+            r1.append(fastq1)
+            test=name1
+            
         # Niel a1a2 b3b4  Used reg exp to identify but then for some reason I split the name variable to allocate, It was just easier
         elif a1b4:
             name=name.split('-')    
