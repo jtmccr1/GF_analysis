@@ -342,6 +342,18 @@ for line in file:
         if searchname == '581B-2-d1':
             replacements.append('b-'+searchname)
             searchname = '581B-2-D1'
+        if searchname == 'NT-dn-19':
+            replacements.append('b-'+searchname)
+            searchname = 'N-T-dn-19'
+        if searchname == 'NT-dn-18':
+            replacements.append('b-'+searchname)
+            searchname = 'N-T-dn-18'        
+        if searchname == 'NT-dn-9':
+            replacements.append('b-'+searchname)
+            searchname == 'N-T-dn-9'
+        if searchname == 'b3-1357-19':
+            replacements.append('b-'+searchname)
+            searchname == 'b4-1357-19'        
     
         if r%2!=0: #odd
     	    for l in range(len(r1)):         #r1 is from the odd lines and so should only include R1 reads so searching for name is fine
