@@ -1,8 +1,8 @@
 library(gplots)
 library(plotrix)
 
-#relabund <-read.table('simple.relabund.metadata', header=T,sep='\t',strip.white=TRUE)
-#relabund <- relabund[,c(2:4,6:ncol(relabund))]
+relabund <-read.table('/Volumes/MCCRONE/603 Project/Data/simple.relabund.metadata', header=T,sep='\t',strip.white=TRUE)
+relabund <- relabund[,c(2:4,6:ncol(relabund))]
 
 
 #Cage - the cage that is used for the plot
@@ -10,7 +10,7 @@ library(plotrix)
 #lim is the limmit that an otu must reach at least once during the experiment to be included in the plot
 
 relabund_plot<-function(cage,meta,type,lim){
-  #type='count' Debugging
+  #type='count' #Debugging
   #cage='A'
   #meta=relabund
   #lim=2
@@ -32,7 +32,7 @@ relabund_plot<-function(cage,meta,type,lim){
       stderror<-rbind(stderror,y)
     }
   }
-  means<-data.frame(means)  # Yeah the row names are duplicated but it is of no
+  means<-data.frame(means[,])  # Yeah the row names are duplicated but it is of no
   stderror<-data.frame(stderror) #concern for us. Right?
   good <- c()    # to be used in the following if statements
   if(type=='percent'){
@@ -52,8 +52,9 @@ relabund_plot<-function(cage,meta,type,lim){
       totalmeans<-sort(apply(means,2,mean),decreasing=TRUE)
       filtered_means<-totalmeans[1:lim]
       good<- which(names(means) %in% names(filtered_means))
+      
     }
-
+good<-c(good,which(names(means)=='Otu00016'))
 means <-means[,c(good)]
 
 stderror <-stderror[,c(good)]
@@ -68,7 +69,7 @@ stderror <-stderror[,c(good)]
 
 #Plotting###
 plot(1, type='n', xlim=c(days[1],days[length(days)]), ylim=c(0,0.8), ylab="Relative Abundance", xlab="Day", main = paste("Relative abundance in cage:",cage,sep=" "))
-  
+legend(x=5,legend=names(means))
 if(is.null(ncol(means))==TRUE){
     size = 1
   } else {
@@ -77,6 +78,7 @@ if(is.null(ncol(means))==TRUE){
   for(i in 1:size){
     points(days,means[,i],pch=i,col=i,type='l')
     plotCI(days,means[,i], uiw=stderror[,i], add=T, col=i)
+    
   }
 #return(means)
 #return(stderror)
