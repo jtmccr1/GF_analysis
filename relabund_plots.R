@@ -55,9 +55,15 @@ relabund_plot<-function(cage,meta,type,lim){
       
     }
 good<-c(good,which(names(means)=='Otu00016'))
+other<-means[,!(c(1:ncol(means)) %in% good)]
+
+other <- t(other)
+other <- apply(other,2,sum)
+
 means <-means[,c(good)]
 
 stderror <-stderror[,c(good)]
+
 #why not take the good columns and not the bad ones then I don't need to use data tables 
 #Use Data.table to remove 'bad' columns there may be a better way to do this so that we can just used data frames
 #or maybe just data tables to be consistant
@@ -68,20 +74,20 @@ stderror <-stderror[,c(good)]
 
 
 #Plotting###
-plot(1, type='n', xlim=c(days[1],days[length(days)]), ylim=c(0,0.8), ylab="Relative Abundance", xlab="Day", main = paste("Relative abundance in cage:",cage,sep=" "))
-legend(x=5,legend=names(means))
+plot(1, type='n', xlim=c(days[1],days[length(days)]), ylim=c(0,0.8), ylab="Relative Abundance", xlab="Day", main = paste("Four most abundant OTUs"))
+legend(x=0.8,'Bacterodetes 1','Bacterodetes 2')
 if(is.null(ncol(means))==TRUE){
     size = 1
   } else {
     size = ncol(means)
   }
   for(i in 1:size){
-    points(days,means[,i],pch=i,col=i,type='l')
+    points(days,means[,i],pch=16,col=i,type='l')
     plotCI(days,means[,i], uiw=stderror[,i], add=T, col=i)
     
   }
 #return(means)
 #return(stderror)
 #return(days)
-list(means,stderror,days)
+list(means,stderror,days,other)
 }
